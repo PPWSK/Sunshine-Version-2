@@ -25,4 +25,5 @@ dependencies {
     compile 'com.squareup.okhttp:okhttp:2.2.0'
     compile 'de.greenrobot:eventbus:2.4.0'
     compile 'com.pnikosis:materialish-progress:1.4'
+    debugCompile 'com.facebook.stetho:stetho:1.0.0'
 }
