@@ -28,6 +28,7 @@ import android.text.format.Time;
 import android.util.Log;
 
 import com.example.android.sunshine.app.MainActivity;
+import com.example.android.sunshine.app.MessageEvent;
 import com.example.android.sunshine.app.R;
 import com.example.android.sunshine.app.Utility;
 import com.example.android.sunshine.app.data.WeatherContract;
@@ -43,6 +44,8 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.Vector;
 
+import de.greenrobot.event.EventBus;
+
 public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter {
     public final String LOG_TAG = SunshineSyncAdapter.class.getSimpleName();
     // Interval at which to sync with the weather, in seconds.
@@ -51,8 +54,8 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter {
     public static final int SYNC_FLEXTIME = SYNC_INTERVAL / 3;
     private static final long DAY_IN_MILLIS = 1000 * 60 * 60 * 24;
     private static final int WEATHER_NOTIFICATION_ID = 3004;
-    private OkHttpClient okClient;
 
+    private OkHttpClient okClient;
 
     private static final String[] NOTIFY_WEATHER_PROJECTION = new String[]{
             WeatherContract.WeatherEntry.COLUMN_WEATHER_ID,
@@ -74,6 +77,9 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter {
     @Override
     public void onPerformSync(Account account, Bundle extras, String authority, ContentProviderClient provider, SyncResult syncResult) {
         Log.d(LOG_TAG, "Starting sync");
+        /* start indeterminate progress */
+        EventBus.getDefault().post(new MessageEvent(MessageEvent.STARTING_SYNC));
+
         String locationQuery = Utility.getPreferredLocation(getContext());
 
         // Will contain the raw JSON response as a string.
@@ -270,6 +276,7 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter {
             }
 
             Log.d(LOG_TAG, "Sync Complete. " + cVVector.size() + " Inserted");
+            EventBus.getDefault().post(new MessageEvent(MessageEvent.ENDING_SYNC));
 
         } catch (JSONException e) {
             Log.e(LOG_TAG, e.getMessage(), e);
